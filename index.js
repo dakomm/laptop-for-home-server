@@ -29,11 +29,11 @@ const mysqlConnection = async (sqlQuery) => {
       await connection.beginTransaction();
       let [rows] = await connection.query(sqlQuery);
       await connection.commit();
-      connection.release();
+      connection.release().catch(function(err){console.log(err)});
       return rows;
     } catch(err){
       await connection.rollback();
-      connection.release();
+      connection.release().catch(function(err){console.log(err)});
       console.log('*Query Error: '+err);
       return false;
     }
@@ -61,6 +61,7 @@ app.post("/api/membersinfo/chkuserinfo", async (req,res)=> {
   var rtnval = await mysqlConnection("SELECT * FROM laptopforhome.membersinfo WHERE(`user_id`="+req.body.id+");");
   console.log("*QUERY: "+"SELECT * FROM laptopforhome.membersinfo WHERE(`user_id`="+req.body.id+");");
   if(!rtnval){
+    console.log("rtnval === false")
     return res.json(rtnval);
   }else{
     return res.json(rtnval[0].user_name);
