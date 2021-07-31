@@ -29,11 +29,11 @@ const mysqlConnection = async (sqlQuery) => {
       await connection.beginTransaction();
       let [rows] = await connection.query(sqlQuery);
       await connection.commit();
-      connection.release().catch(function(err){console.log(err)});
+      connection.release();
       return rows;
     } catch(err){
       await connection.rollback();
-      connection.release().catch(function(err){console.log(err)});
+      connection.release();
       console.log('*Query Error: '+err);
       return false;
     }
@@ -60,9 +60,9 @@ app.get("/dbtest", async (req,res)=>{
 app.post("/api/membersinfo/chkuserinfo", async (req,res)=> {
   var rtnval = await mysqlConnection("SELECT * FROM laptopforhome.membersinfo WHERE(`user_id`="+req.body.id+");");
   console.log("*QUERY: "+"SELECT * FROM laptopforhome.membersinfo WHERE(`user_id`="+req.body.id+");");
-  if(!rtnval){
-    console.log("rtnval === false")
-    return res.json(rtnval);
+  if(!rtnval || rtnval.toString() === ""){
+    console.log("rtnval === false or []")
+    return res.json(false);
   }else{
     return res.json(rtnval[0].user_name);
   }
@@ -76,7 +76,7 @@ app.get("/api/listdata/readdb", async (req,res)=> {
 
 app.post("/api/listdata/insert", async (req,res)=> {
   var rtnval = await mysqlConnection("INSERT INTO laptopforhome.listdata(id, num, date, getter)"+
-                                     " VALUES ('"+req.body.id+"','"+req.body.num+"','"+req.body.date+"','"+req.body.getter+"');")
+                                     " VALUES ("+req.body.id+",'"+req.body.num+"','"+req.body.date+"','"+req.body.getter+"');")
   console.log("*QUERY: "+"INSERT INTO laptopforhome.listdata(id, num, date, getter)"+
   " VALUES ("+req.body.id+",'"+req.body.num+"','"+req.body.date+"','"+req.body.getter+"');");
 
@@ -84,12 +84,37 @@ app.post("/api/listdata/insert", async (req,res)=> {
 });
 
 app.post("/api/listdata/delete", async (req,res)=> {
-  var rtnval = await mysqlConnection("DELETE FROM laptopforhome.listdata WHERE num="+req.body.num+";"
+  var rtnval = await mysqlConnection('DELETE FROM laptopforhome.listdata WHERE id='+req.body.id+';'
                                      +"SET @CNT=-1;" + "UPDATE listdata SET listdata.id=@CNT:=@CNT+1;")
-  console.log("*QUERY: "+"DELETE FROM laptopforhome.listdata WHERE num="+req.body.num+";"
+  console.log("*QUERY: "+'DELETE FROM laptopforhome.listdata WHERE id='+req.body.id+';'
   +"SET @CNT=-1;" + "UPDATE listdata SET listdata.id=@CNT:=@CNT+1;");
 
   return res.json(rtnval);
+});
+
+app.post("/api/listdata/listupbygetter", async (req,res)=> {
+  var rtnval = await mysqlConnection('SELECT * FROM laptopforhome.listdata WHERE(`getter`="'+req.body.getter+'");');
+  console.log("*QUERY: "+'SELECT * FROM laptopforhome.listdata WHERE(`getter`="'+req.body.getter+'");');
+  if(!rtnval){
+    console.log("rtnval === false")
+    return res.json(rtnval);
+  }else{
+    var resultArray = JSON.parse(JSON.stringify(rtnval));
+    return res.json(resultArray);
+  }
+});
+
+app.post("/api/listdata/listupbynum", async (req,res)=> {
+  var rtnval = await mysqlConnection('SELECT * FROM laptopforhome.listdata WHERE(`num`="'+req.body.num+'");');
+  console.log("*QUERY: "+'SELECT * FROM laptopforhome.listdata WHERE(`num`="'+req.body.num+'");');
+  if(!rtnval){
+    console.log("rtnval === false")
+    return res.json(rtnval);
+  }else{
+    var resultArray = JSON.parse(JSON.stringify(rtnval));
+    console.log(resultArray)
+    return res.json(resultArray);
+  }
 });
 
 
