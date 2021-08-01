@@ -45,18 +45,6 @@ const mysqlConnection = async (sqlQuery) => {
 
 /* API */
 /* Read DB from MySql -------------------------------- */
-app.get("/dakomm", (req,res) => {
-  // console.log(req.body.num);
-  console.log("I'm D.A.Komm");
-  // var ans = 10 * req.body.num;
-  return res.json("I'm D.A.Komm! HI!");
-});
-
-app.get("/dbtest", async (req,res)=>{
-  var rtnval = await mysqlConnection("SELECT * FROM laptopforhome.listdata;");
-  return res.json(rtnval);
-});
-
 app.post("/api/membersinfo/chkuserinfo", async (req,res)=> {
   var rtnval = await mysqlConnection("SELECT * FROM laptopforhome.membersinfo WHERE(`user_id`="+req.body.id+");");
   console.log("*QUERY: "+"SELECT * FROM laptopforhome.membersinfo WHERE(`user_id`="+req.body.id+");");
@@ -66,6 +54,17 @@ app.post("/api/membersinfo/chkuserinfo", async (req,res)=> {
   }else{
     return res.json(rtnval[0].user_name);
   }
+});
+
+app.post("/api/membersinfo/insert", async (req,res)=> {
+  for(i=0;i<req.body.length;i++){
+    console.log(req.body.length)
+    var rtnval = await mysqlConnection("INSERT INTO laptopforhome.membersinfo(user_id, user_name)"+
+                                      " VALUES ('"+req.body[i].id+"','"+req.body[i].name+"');")
+    console.log("*QUERY: "+"INSERT INTO laptopforhome.membersinfo(user_id, user_name)"+
+    " VALUES ('"+req.body[i].id+"','"+req.body[i].name+"');");
+  }
+  return res.json(rtnval);
 });
 
 app.get("/api/listdata/readdb", async (req,res)=> {
