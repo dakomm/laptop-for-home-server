@@ -49,7 +49,6 @@ app.post("/api/membersinfo/chkuserinfo", async (req,res)=> {
   var rtnval = await mysqlConnection("SELECT * FROM laptopforhome.membersinfo WHERE(`user_id`="+req.body.id+");");
   console.log("*QUERY: "+"SELECT * FROM laptopforhome.membersinfo WHERE(`user_id`="+req.body.id+");");
   if(!rtnval || rtnval.toString() === ""){
-    console.log("rtnval === false or []")
     return res.json(false);
   }else{
     return res.json(rtnval[0].user_name);
@@ -95,7 +94,6 @@ app.post("/api/listdata/listupbygetter", async (req,res)=> {
   var rtnval = await mysqlConnection('SELECT * FROM laptopforhome.listdata WHERE(`getter`="'+req.body.getter+'");');
   console.log("*QUERY: "+'SELECT * FROM laptopforhome.listdata WHERE(`getter`="'+req.body.getter+'");');
   if(!rtnval){
-    console.log("rtnval === false")
     return res.json(rtnval);
   }else{
     var resultArray = JSON.parse(JSON.stringify(rtnval));
@@ -107,11 +105,9 @@ app.post("/api/listdata/listupbynum", async (req,res)=> {
   var rtnval = await mysqlConnection('SELECT * FROM laptopforhome.listdata WHERE(`num`="'+req.body.num+'");');
   console.log("*QUERY: "+'SELECT * FROM laptopforhome.listdata WHERE(`num`="'+req.body.num+'");');
   if(!rtnval){
-    console.log("rtnval === false")
     return res.json(rtnval);
   }else{
     var resultArray = JSON.parse(JSON.stringify(rtnval));
-    console.log(resultArray)
     return res.json(resultArray);
   }
 });
